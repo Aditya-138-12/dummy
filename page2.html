@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Sentiment Analyzer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+        }
+
+        input,
+        button {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        input {
+            width: 70%;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        ul {
+            margin-top: 20px;
+            padding-left: 0;
+        }
+
+        li {
+            list-style: none;
+            padding: 8px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .neutral {
+            color: gray;
+        }
+
+        .positive {
+            color: green;
+        }
+
+        .negative {
+            color: red;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Sentiment Analysis Multiclass using KG</h2>
+
+    <input type="text" id="textInput" placeholder="Enter your text" />
+    <button onclick="analyzeSentiment()">Submit</button>
+
+    <h3>History</h3>
+    <ul id="history"></ul>
+
+    <script>
+        async function analyzeSentiment() {
+            const textInput = document.getElementById("textInput");
+            const text = textInput.value.trim();
+
+            if (!text) return;
+
+            try {
+                const response = await fetch("http://localhost:8001/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ text })
+                });
+
+                const data = await response.json();
+
+                addToHistory(text, data.sentiment);
+                textInput.value = "";
+            } catch (error) {
+                alert("Error connecting to server");
+                console.error(error);
+            }
+        }
+
+        function addToHistory(text, sentiment) {
+            const history = document.getElementById("history");
+            const li = document.createElement("li");
+
+            li.className = sentiment;
+            li.innerHTML = `<strong>${text}</strong><br>Sentiment: ${sentiment}`;
+
+            history.prepend(li);
+        }
+    </script>
+
+</body>
+
+</html>
