@@ -1,0 +1,25 @@
+# Text branch
+text_input = layers.Input(shape=(57, 50))
+x = layers.Bidirectional(layers.LSTM(64, return_sequences=True))(text_input)
+x = layers.Dropout(0.2)(x)
+x = layers.Bidirectional(layers.LSTM(64, return_sequences=True))(x)
+
+attention = layers.Attention()([x, x])
+x = layers.GlobalAveragePooling1D()(attention)
+
+# KG branch
+kg_input = layers.Input(shape=(KG_DIM,))
+kg_proj = layers.Dense(128, activation='relu')(kg_input)
+kg_proj = layers.Dropout(0.2)(kg_proj)
+
+# Negation flag
+neg_input = layers.Input(shape=(1,))
+
+# Fusion
+combined = layers.concatenate([x, kg_proj, neg_input])
+output = layers.Dense(3, activation='softmax')(combined)
+
+model = Model(
+    inputs=[text_input, kg_input, neg_input],
+    outputs=output
+)
